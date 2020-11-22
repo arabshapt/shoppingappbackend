@@ -5,29 +5,16 @@ import * as express from "express";
 const { ApolloServer, gql } = require("apollo-server-express");
 
 admin.initializeApp();
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
 
-// A schema is a collection of type definitions (hence "typeDefs")
-// that together define the "shape" of queries that are executed against
-// your data.
 const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
-  # This "Book" type defines the queryable fields for every book in our data source.
   type Item {
-    id: ID
-    name: String
-    amount: Int
-    calories: Int
-    fat: Int
-    carbs: Int
-    protein: Int
+    id: ID!
+    name: String!
+    amount: Int!
+    calories: Int!
+    fat: Int!
+    carbs: Int!
+    protein: Int!
   }
 
   input UpdateItem {
@@ -47,11 +34,8 @@ const typeDefs = gql`
     protein: Int
   }
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    items(userId: ID!): [Item]
+    readItems(userId: ID!): [Item!]
     readItem(userId: ID!, itemId: ID): Item
   }
   type Mutation {
@@ -63,7 +47,7 @@ const typeDefs = gql`
 
 const resolvers = {
   Query: {
-    items: async (parent: any, args: any, context: any, info: any) => {
+    readItems: async (parent: any, args: any, context: any, info: any) => {
       const response = await admin
         .database()
         .ref(args.userId)
@@ -111,6 +95,6 @@ const resolvers = {
 };
 
 const app = express();
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ typeDefs, resolvers/* , introspection: true */ });
 server.applyMiddleware({ app, path: "/", cors: true });
 exports.graphql = functions.https.onRequest(app);
